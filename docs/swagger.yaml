@@ -1,0 +1,17 @@
+basePath: /api/v1
+host: localhost:8081
+info:
+  contact: {}
+  description: This is a sample server celler server based on Gin.
+  title: Gin Golang Restspi
+  version: "1.0"
+paths: {}
+schemes:
+- http
+securityDefinitions:
+  BearerAuth:
+    description: API Key authorization
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

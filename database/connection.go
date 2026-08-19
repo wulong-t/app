@@ -12,7 +12,7 @@ var DB *gorm.DB
 
 func Connect() {
 	db, err := gorm.Open(mysql.New(mysql.Config{
-		DSN: "user:pass@tcp(127.0.0.1:3306)/dbname?charset=utf8mb4&parseTime=True&loc=Local",
+		DSN: "root:app_root_pwd@tcp(127.0.0.1:3306)/app_db?charset=utf8mb4&parseTime=True&loc=Local",
 	}), &gorm.Config{})
 	if err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)
