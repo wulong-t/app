@@ -1,6 +1,7 @@
 package database
 
 import (
+	"Server/models"
 	"log"
 	"time"
 
@@ -25,4 +26,9 @@ func Connect() {
 	sqlDB.SetMaxIdleConns(5)
 	sqlDB.SetConnMaxLifetime(30 * time.Minute)
 	DB = db
+
+	// AutoMigrate 创建/更新表结构（开发阶段用；生产建议用正式迁移工具）
+	if err := db.AutoMigrate(&models.UserModel{}); err != nil {
+		log.Fatalf("Failed to migrate database: %v", err)
+	}
 }

@@ -1,0 +1,19 @@
+package models
+
+type UserModel struct {
+	ID        uint     `json:"id" gorm:"primaryKey"`
+	Name      string   `json:"name"`
+	Email     string   `json:"email" binding:"required"`
+	Password  string   `json:"password" binding:"required,min=5"`
+	ImageURL  string   `json:"image_url"`
+	Bio       string   `json:"bio"`
+	Followers []string `json:"followers" gorm:"-"`
+	Following []string `json:"following" gorm:"-"`
+}
+
+type CreateUser struct {
+	Email     string `json:"email" binding:"required"`
+	Password  string `json:"password" binding:"required,min=5"`
+	FirstName string `json:"first_name" binding:"required"`
+	LastName  string `json:"last_name" binding:"required"`
+}

@@ -3,6 +3,8 @@ package main
 import (
 	"Server/database"
 	_ "Server/docs"
+	"Server/routes"
+	"net/http"
 	"time"
 
 	"github.com/gin-contrib/cors"
@@ -15,8 +17,8 @@ import (
 // @version         1.0
 // @description     This is a sample server celler server based on Gin.
 
-// @host      localhost:8081
-// @BasePath  /api/v1
+// @host      localhost:8082
+// @BasePath  /
 // @schemes   http
 
 // @securityDefinitions.apiKey  BearerAuth
@@ -36,14 +38,11 @@ func main() {
 		MaxAge:           12 * time.Hour,
 	}))
 
-	r.Group("/api/v1")
-	{
-		r.GET("/", func(ctx *gin.Context) {
-			ctx.String(200, "Hello World!")
-		})
-
-	}
+	r.GET("/", func(ctx *gin.Context) {
+		ctx.String(http.StatusOK, "Welcome World!")
+	})
+	routes.SetupRoutes(r)
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	r.Run("localhost:8081")
+	r.Run("localhost:8082")
 }
