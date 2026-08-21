@@ -4,11 +4,13 @@ import (
 	"Server/database"
 	_ "Server/docs"
 	"Server/routes"
+	"log"
 	"net/http"
 	"time"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 	swaggerFiles "github.com/swaggo/files"     // swagger embed files
 	ginSwagger "github.com/swaggo/gin-swagger" // gin-swagger middleware
 )
@@ -28,6 +30,10 @@ import (
 
 func main() {
 	database.Connect()
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
 	r := gin.New()
 	r.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"*"},

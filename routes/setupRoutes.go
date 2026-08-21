@@ -2,10 +2,20 @@ package routes
 
 import (
 	"Server/controller"
+	"Server/middleware"
 
 	"github.com/gin-gonic/gin"
 )
 
 func SetupRoutes(app *gin.Engine) {
-	app.POST("/user/register", controller.Register)
+	auth := app.Group("/user")
+	{
+		auth.POST("/register", controller.Register)
+		auth.POST("/login", controller.Login)
+	}
+	user := app.Group("/user")
+	user.Use(middleware.AuthMiddleware())
+	{
+		user.GET("/getuser/:id", controller.GetUserByID)
+	}
 }

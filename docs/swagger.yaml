@@ -17,6 +17,43 @@ definitions:
     - last_name
     - password
     type: object
+  models.LoginUser:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  models.UserModel:
+    properties:
+      bio:
+        type: string
+      email:
+        type: string
+      followers:
+        items:
+          type: string
+        type: array
+      following:
+        items:
+          type: string
+        type: array
+      id:
+        type: integer
+      image_url:
+        type: string
+      name:
+        type: string
+      password:
+        minLength: 5
+        type: string
+    required:
+    - email
+    - password
+    type: object
 host: localhost:8082
 info:
   contact: {}
@@ -24,6 +61,70 @@ info:
   title: Gin Golang Restspi
   version: "1.0"
 paths:
+  /user/getuser/{id}:
+    get:
+      description: Get user by ID
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.UserModel'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get user by ID
+      tags:
+      - Users
+  /user/login:
+    post:
+      consumes:
+      - application/json
+      description: Login a user with email, password
+      parameters:
+      - description: user Login details
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.LoginUser'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Login a user
+      tags:
+      - Auth
   /user/register:
     post:
       consumes:
@@ -43,9 +144,15 @@ paths:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/models.CreateUser'
+            additionalProperties: true
+            type: object
         "400":
           description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
           schema:
             additionalProperties: true
             type: object
