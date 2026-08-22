@@ -7,8 +7,6 @@ type UserModel struct {
 	Password  string   `json:"password" binding:"required,min=5"`
 	ImageURL  string   `json:"image_url"`
 	Bio       string   `json:"bio"`
-	Followers []string `json:"followers" gorm:"-"`
-	Following []string `json:"following" gorm:"-"`
 }
 
 type CreateUser struct {

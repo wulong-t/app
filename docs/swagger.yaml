@@ -42,14 +42,6 @@ definitions:
         type: string
       email:
         type: string
-      followers:
-        items:
-          type: string
-        type: array
-      following:
-        items:
-          type: string
-        type: array
       id:
         type: integer
       image_url:
@@ -70,6 +62,43 @@ info:
   title: Gin Golang Restspi
   version: "1.0"
 paths:
+  /user/follow/{id}:
+    patch:
+      description: follow user, if user is already followed, unfollow
+      parameters:
+      - description: Target ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Follow user
+      tags:
+      - Users
   /user/getuser/{id}:
     get:
       description: Get user by ID
