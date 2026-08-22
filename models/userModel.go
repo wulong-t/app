@@ -22,3 +22,9 @@ type LoginUser struct {
 	Email    string `json:"email" binding:"required"`
 	Password string `json:"password" binding:"required"`
 }
+
+type UpdateUser struct { 
+	Name     string `json:"name"`
+	ImageURL string `json:"image_url"`
+	Bio      string `json:"bio"`
+}

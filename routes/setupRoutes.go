@@ -17,5 +17,6 @@ func SetupRoutes(app *gin.Engine) {
 	user.Use(middleware.AuthMiddleware())
 	{
 		user.GET("/getuser/:id", controller.GetUserByID)
+		user.PATCH("/updateuser/:id", controller.UpdateUser)
 	}
 }

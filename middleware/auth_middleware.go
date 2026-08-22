@@ -43,7 +43,7 @@ func AuthMiddleware() gin.HandlerFunc {
 		}
 
 		// 下游处理器通过 c.GetString("userid") 获取当前用户 ID
-		c.Set("userid", claims.Subject)
+		c.Set("userID", claims.Subject)
 		c.Next()
 	}
 }
