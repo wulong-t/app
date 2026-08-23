@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"slices"
 	"strconv"
 	"time"
 
@@ -109,18 +110,18 @@ func UpdateUser(c *gin.Context) {
 func FollowUser(c *gin.Context) {
 	currentID := c.GetString("userID")
 	targetID := c.Param("id")
-	targetU,err := strconv.ParseUint(targetID, 10, 64)
+	targetU, err := strconv.ParseUint(targetID, 10, 64)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "Invalid user ID",
+			"error":   "Invalid user ID",
 			"details": err.Error(),
 		})
 		return
 	}
-	currentU,err := strconv.ParseUint(currentID, 10, 64)
+	currentU, err := strconv.ParseUint(currentID, 10, 64)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "Invalid user ID",
+			"error":   "Invalid user ID",
 			"details": err.Error(),
 		})
 		return
@@ -141,7 +142,7 @@ func FollowUser(c *gin.Context) {
 			return
 		}
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": "Failed to get user",
+			"error":   "Failed to get user",
 			"details": err.Error(),
 		})
 		return
@@ -150,7 +151,7 @@ func FollowUser(c *gin.Context) {
 	if err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusInternalServerError, gin.H{
-				"error": "Failed to check follow",
+				"error":   "Failed to check follow",
 				"details": err.Error(),
 			})
 			return
@@ -159,7 +160,7 @@ func FollowUser(c *gin.Context) {
 		err = gorm.G[models.FollowModel](database.DB).Create(ctx, &follow)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
-				"error": "Failed to follow user",
+				"error":   "Failed to follow user",
 				"details": err.Error(),
 			})
 			return
@@ -171,7 +172,7 @@ func FollowUser(c *gin.Context) {
 		_, err = gorm.G[models.FollowModel](database.DB).Where("follower_id = ? && followed_id = ?", currentUID, targetUID).Delete(ctx)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
-				"error": "Failed to unfollow user",
+				"error":   "Failed to unfollow user",
 				"details": err.Error(),
 			})
 			return
@@ -180,4 +181,84 @@ func FollowUser(c *gin.Context) {
 			"message": "Unfollowed user",
 		})
 	}
+}
+
+// GetSugUser
+// @Summary Get suggested users
+// @Description Get suggested users by following
+// @Tags Users
+// @Produce json
+// @Param id query string true "User ID"
+// @Security BearerAuth
+// @Success 200 {object} []models.UserModel
+// @Failure 400 {object} map[string]any
+// @Failure 404 {object} map[string]any
+// @Failure 500 {object} map[string]any
+// @Router /user/suguser [get]
+func GetSugUser(c *gin.Context) {
+	ctx, cancel := context.WithTimeout(c, 10*time.Second)
+	defer cancel()
+	mainID := c.Query("id")
+	mainU, err := strconv.ParseUint(mainID, 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error":   "Invalid user ID",
+			"details": err.Error(),
+		})
+		return
+	}
+	mainUID := uint(mainU)
+	followingUsers, err := gorm.G[models.FollowModel](database.DB).Where("follower_id = ?", mainUID).Find(ctx)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{"error": "User no follow any users"})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error":   "Failed to get users",
+			"details": err.Error(),
+		})
+		return
+	}
+	followingIDs := []uint{}
+	for _, record := range followingUsers {
+		followingIDs = append(followingIDs, record.FollowedID)
+	}
+	ffs, err := gorm.G[models.FollowModel](database.DB).Where("follower_id IN ?", followingIDs).Find(ctx)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error":   "Failed to get users",
+			"details": err.Error(),
+		})
+		return
+	}
+	sugUsers := make(map[uint]struct{})
+	for _, record := range ffs {
+		if record.FollowedID == mainUID {
+			continue
+		}
+		if slices.Contains(followingIDs, record.FollowedID) {
+			continue
+		}
+		sugUsers[record.FollowedID] = struct{}{}
+	}
+	if len(sugUsers) == 0 {
+		c.JSON(http.StatusOK, gin.H{
+			"message": "No suggestions",
+		})
+		return
+	}
+	sugIDs := make([]uint, 0, len(sugUsers))
+	for id := range sugUsers {
+		sugIDs = append(sugIDs, id)
+	}
+	users, err := gorm.G[models.UserModel](database.DB).Where("id IN ?", sugIDs).Find(ctx)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error":   "Failed to get users",
+			"details": err.Error(),
+		})
+		return
+	}
+	c.JSON(http.StatusOK, users)
 }

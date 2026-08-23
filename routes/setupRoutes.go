@@ -19,5 +19,6 @@ func SetupRoutes(app *gin.Engine) {
 		user.GET("/getuser/:id", controller.GetUserByID)
 		user.PATCH("/updateuser/:id", controller.UpdateUser)
 		user.PATCH("/follow/:id", controller.FollowUser)
+		user.GET("/suguser", controller.GetSugUser)
 	}
 }
