@@ -20,5 +20,6 @@ func SetupRoutes(app *gin.Engine) {
 		user.PATCH("/updateuser/:id", controller.UpdateUser)
 		user.PATCH("/follow/:id", controller.FollowUser)
 		user.GET("/suguser", controller.GetSugUser)
+		user.DELETE("/delete/:id", controller.DeleteUserByID)
 	}
 }

@@ -262,3 +262,52 @@ func GetSugUser(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, users)
 }
+
+// DeleteUserByID
+// @Summary Delete user by ID
+// @Description Delete user by ID
+// @Tags Users
+// @Param id path string true "User ID"
+// @Security BearerAuth
+// @Produce json
+// @Success 200 {object} map[string]any
+// @Failure 400 {object} map[string]any
+// @Failure 500 {object} map[string]any
+// @Router /user/delete/{id} [delete]
+func DeleteUserByID(c *gin.Context) {
+	currentID := c.GetString("userID")
+	targetID := c.Param("id")
+	targetU, err := strconv.ParseUint(targetID, 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error":   "Invalid user ID",
+			"details": err.Error(),
+		})
+		return
+	}
+	currentU, err := strconv.ParseUint(currentID, 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error":   "Invalid user ID",
+			"details": err.Error(),
+		})
+		return
+	}
+	currentUID := uint(currentU)
+	targetUID := uint(targetU)
+	if currentUID != targetUID {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "You cannot delete other users"})
+		return
+	}
+	ctx, cancel := context.WithTimeout(c, 10*time.Second)
+	defer cancel()
+	if _, err := gorm.G[models.UserModel](database.DB).Where("id = ?", targetUID).Delete(ctx); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error":   "Failed to delete user",
+			"details": err.Error(),
+		})
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Deleted user",
+	})
+}
