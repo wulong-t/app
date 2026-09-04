@@ -13,7 +13,7 @@ message MessageRequest {
 }
 
 message MessageResponse {
-    string message = 2;
+    uint64 message_id = 1;
 }
 
 message GetUserFollowingFollowersRequest {

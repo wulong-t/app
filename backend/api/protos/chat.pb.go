@@ -83,7 +83,7 @@ func (x *MessageRequest) GetContent() string {
 
 type MessageResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
+	MessageId     uint64                 `protobuf:"varint,1,opt,name=message_id,json=messageId,proto3" json:"message_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -118,11 +118,11 @@ func (*MessageResponse) Descriptor() ([]byte, []int) {
 	return file_protos_chat_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *MessageResponse) GetMessage() string {
+func (x *MessageResponse) GetMessageId() uint64 {
 	if x != nil {
-		return x.Message
+		return x.MessageId
 	}
-	return ""
+	return 0
 }
 
 type GetUserFollowingFollowersRequest struct {
@@ -265,9 +265,10 @@ const file_protos_chat_proto_rawDesc = "" +
 	"\x0eMessageRequest\x12\x16\n" +
 	"\x06sender\x18\x01 \x01(\tR\x06sender\x12\x1a\n" +
 	"\breceiver\x18\x02 \x01(\tR\breceiver\x12\x18\n" +
-	"\acontent\x18\x03 \x01(\tR\acontent\"+\n" +
-	"\x0fMessageResponse\x12\x18\n" +
-	"\amessage\x18\x02 \x01(\tR\amessage\";\n" +
+	"\acontent\x18\x03 \x01(\tR\acontent\"0\n" +
+	"\x0fMessageResponse\x12\x1d\n" +
+	"\n" +
+	"message_id\x18\x01 \x01(\x04R\tmessageId\";\n" +
 	" GetUserFollowingFollowersRequest\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\"H\n" +
 	"\x1eUserFollowingFollowersResponse\x12&\n" +
