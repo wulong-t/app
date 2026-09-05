@@ -3,6 +3,7 @@ package realtime
 import (
 	"errors"
 	"log"
+	"realTimeChat/servergrpc"
 	"sync"
 
 	"github.com/gin-gonic/gin"
@@ -116,15 +117,18 @@ func (cm *ConnectionManager) SendMessage(message *Message) {
 		return
 	}
 	err := conn.WriteJSON(gin.H{
-		"type":   "message",
-		"sender": message.Sender,
+		"type":    "message",
+		"sender":  message.Sender,
 		"content": message.Content,
 	})
 	if err != nil {
 		log.Printf("Error sending message to %s: %v", message.Receiver, err)
 		return
 	}
-	// todo: store the message in the database via gRPC
+	err = servergrpc.SendMessage(message.Sender, message.Receiver, message.Content)
+	if err != nil {
+		log.Fatalf("Error sending message via gRPC: %v", err)
+	}
 }
 
 func (cm *ConnectionManager) isFriend(userID, friendID string) (bool, error) {
@@ -141,7 +145,6 @@ func (cm *ConnectionManager) isFriend(userID, friendID string) (bool, error) {
 	return false, nil
 }
 
-
 func removeFriend(friends []string, friendID string) []string {
 	for i, friend := range friends {
 		if friend == friendID {
@@ -150,4 +153,3 @@ func removeFriend(friends []string, friendID string) []string {
 	}
 	return friends
 }
-
