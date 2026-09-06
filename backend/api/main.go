@@ -3,8 +3,11 @@ package main
 import (
 	"Server/database"
 	_ "Server/docs"
+	pb "Server/protos"
 	"Server/routes"
+	"Server/servergrpc"
 	"log"
+	"net"
 	"net/http"
 	"time"
 
@@ -13,6 +16,8 @@ import (
 	"github.com/joho/godotenv"
 	swaggerFiles "github.com/swaggo/files"     // swagger embed files
 	ginSwagger "github.com/swaggo/gin-swagger" // gin-swagger middleware
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 )
 
 // @title           Gin Golang Restspi
@@ -43,7 +48,21 @@ func main() {
 		AllowCredentials: true,
 		MaxAge:           12 * time.Hour,
 	}))
-
+	// Set gRPC server
+	lis, err := net.Listen("tcp", ":50051")
+	if err != nil {
+		log.Fatalf("failed to listen: %v", err)
+	}
+	grpcServer := grpc.NewServer()
+	pb.RegisterRealtimeChatServiceServer(grpcServer, &servergrpc.Server{})
+	reflection.Register(grpcServer)
+	log.Println("gRPC Server Running on Port 50051")
+	go func() {
+		if err := grpcServer.Serve(lis); err != nil {
+			log.Fatalf("failed to serve: %v", err)
+		}
+	}()
+	// end set
 	r.GET("/", func(ctx *gin.Context) {
 		ctx.String(http.StatusOK, "Welcome World!")
 	})
